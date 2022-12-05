@@ -1,0 +1,5 @@
+dist_electron
+src/assets
+tests/unit/coverage
+public/**/*.js
+

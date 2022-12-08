@@ -1,10 +1,11 @@
 <template>
   <div class="w-full h-full">
     <Siderbar />
-    <AppMain class="ml-[210px]" />
+    <Navbar />
+    <AppMain class="ml-mainLeft mt-mainTop" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { Siderbar, AppMain } from './component/index'
+import { Siderbar, AppMain, Navbar } from './component/index'
 </script>

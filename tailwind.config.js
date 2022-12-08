@@ -2,11 +2,23 @@
 module.exports = {
   content: ['./src/**/*.{vue,js,ts,jsx,tsx}', './public/index.html'],
   theme: {
-    colors: {
-      primary: '#1ECD98',
-      black: '#000000',
+    extend: {
+      colors: {
+        primary: '#1ECD98',
+        noSelect: '#D2D2D2',
+      },
+      width: {
+        siderbarWidth: '210px',
+        navbarWidth: 'calc(100vw - 210px)',
+      },
+      height: {
+        navbarHeight: '75px',
+      },
+      margin: {
+        mainLeft: '210px',
+        mainTop: '75px',
+      },
     },
-    extend: {},
   },
   plugins: [],
 }

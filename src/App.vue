@@ -4,25 +4,37 @@
   </router-view>
 </template>
 
-<style lang="scss">
-// #app {
-//   font-family: Avenir, Helvetica, Arial, sans-serif;
-//   -webkit-font-smoothing: antialiased;
-//   -moz-osx-font-smoothing: grayscale;
-//   text-align: center;
-//   color: #2c3e50;
-// }
+<script lang="ts" setup>
+import { onMounted } from 'vue'
+import { checkLogin } from '@/core/bilibili'
+import { useBaseStore } from '@/store/index'
+import type { TokenData } from '@/types/index'
 
-// nav {
-//   padding: 30px;
+const baseStore = useBaseStore()
 
-//   a {
-//     font-weight: bold;
-//     color: #2c3e50;
+onMounted(() => {
+  // 初始化
+  window.electronApi.once('init-store', async () => {
+    let token = (await window.electronApi.getStore('token')) as TokenData
+    if (!token) {
+      token = {
+        SESSDATA: '',
+        DedeUserID: '',
+        biliJct: '',
+      }
+    }
+    // 初始化登录信息
+    if (token.SESSDATA !== '') {
+      const userData = await checkLogin(token.SESSDATA)
+      baseStore.token = token
+      baseStore.loginStatus = userData.loginStatus
+      if (userData.loginStatus !== 0) {
+        baseStore.username = userData.username
+        baseStore.avatar = userData.avatar
+      }
+    }
+  })
+})
+</script>
 
-//     &.router-link-exact-active {
-//       color: #42b983;
-//     }
-//   }
-// }
-</style>
+<style lang="scss"></style>

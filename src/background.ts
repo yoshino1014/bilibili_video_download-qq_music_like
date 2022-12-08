@@ -1,10 +1,16 @@
 'use strict'
 
-import { app, protocol, BrowserWindow } from 'electron'
+import { app, protocol, BrowserWindow, ipcMain, session, dialog } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
-// import installExtension, { VUEJS3_DEVTOOLS } from "electron-devtools-installer";
-const isDevelopment = process.env.NODE_ENV !== 'production'
+import got from 'got'
+import log from 'electron-log'
+import path from 'path'
+import ecStore from 'electron-store'
 
+const isDevelopment = process.env.NODE_ENV !== 'production'
+const store = new ecStore({
+  name: 'database',
+})
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } },
@@ -25,6 +31,7 @@ async function createWindow() {
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
       nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION as unknown as boolean,
       contextIsolation: !process.env.ELECTRON_NODE_INTEGRATION,
+      preload: path.join(__dirname, 'preload.js'),
     },
   })
 
@@ -40,6 +47,69 @@ async function createWindow() {
     win.loadURL('app://./index.html')
   }
 }
+
+function init() {
+  win.webContents.on('did-finish-load', () => {
+    win.webContents.send('init-store')
+  })
+}
+
+// 发送get请求
+ipcMain.handle('got', (event, url, option) => {
+  return new Promise((resolve, reject) => {
+    got(url, option)
+      .then((res: any) => {
+        return resolve({ body: res.body, redirectUrls: res.redirectUrls, headers: res.headers })
+      })
+      .catch((error: any) => {
+        log.error(`http error: ${error.message}`)
+        return reject(error.message)
+      })
+  })
+})
+
+// electron-store操作
+ipcMain.handle('get-store', (event, path) => {
+  return Promise.resolve(store.get(path))
+})
+
+ipcMain.on('set-store', (event, path, data) => {
+  store.set(path, data)
+})
+
+ipcMain.on('delete-store', (event, path) => {
+  store.delete(path)
+})
+
+// 最小化
+ipcMain.on('minimize', () => {
+  win.minimize()
+})
+// 最大化
+ipcMain.on('maximize', () => {
+  if (win.isMaximized()) {
+    win.unmaximize()
+  } else {
+    win.maximize()
+  }
+})
+// 关闭窗口
+ipcMain.on('close', () => {
+  win.destroy()
+})
+
+// 打开选择文件夹dialog
+ipcMain.handle('open-dir-dialog', () => {
+  const filePaths = dialog.showOpenDialogSync({
+    title: '选择下载地址',
+    defaultPath: app.getPath('downloads'),
+    properties: ['openDirectory'],
+  })
+  if (filePaths) {
+    return Promise.resolve(filePaths[0])
+  }
+  return Promise.reject(new Error('not select'))
+})
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
@@ -64,13 +134,17 @@ app.on('activate', () => {
 app.on('ready', async () => {
   if (isDevelopment && !process.env.IS_TEST) {
     // Install Vue Devtools
-    try {
-      // await installExtension(VUEJS3_DEVTOOLS);
-    } catch (e) {
-      console.error('Vue Devtools failed to install:', (e as Error).toString())
-    }
+    // try {
+    //   await installExtension(VUEJS3_DEVTOOLS)
+    // } catch (e) {
+    //   console.error('Vue Devtools failed to install:', (e as Error).toString())
+    // }
+    await session.defaultSession.loadExtension(
+      'C:\\Users\\11720\\AppData\\Local\\Microsoft\\Edge\\User Data\\Profile 1\\Extensions\\olofadcdnkkjdfgjcmjaadnlehnnihnl\\6.4.5_0'
+    )
   }
   createWindow()
+  init()
 })
 
 // Exit cleanly on request from parent process in development mode.

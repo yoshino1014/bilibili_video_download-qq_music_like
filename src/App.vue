@@ -7,14 +7,16 @@
 <script lang="ts" setup>
 import { onMounted } from 'vue'
 import { checkLogin } from '@/core/bilibili'
-import { useBaseStore } from '@/store/index'
-import type { TokenData } from '@/types/index'
+import { useBaseStore, useSettingStore } from '@/store/index'
+import type { TokenData, SettingData } from '@/types/index'
 
 const baseStore = useBaseStore()
+const settingStore = useSettingStore()
 
 onMounted(() => {
   // 初始化
   window.electronApi.once('init-store', async () => {
+    // 初始化登录信息
     let token = (await window.electronApi.getStore('token')) as TokenData
     if (!token) {
       token = {
@@ -23,7 +25,6 @@ onMounted(() => {
         biliJct: '',
       }
     }
-    // 初始化登录信息
     if (token.SESSDATA !== '') {
       const userData = await checkLogin(token.SESSDATA)
       baseStore.token = token
@@ -32,6 +33,11 @@ onMounted(() => {
         baseStore.username = userData.username
         baseStore.avatar = userData.avatar
       }
+    }
+    // 初始化设置信息
+    const setting = (await window.electronApi.getStore('setting')) as SettingData
+    if (setting) {
+      settingStore.setSetting(setting)
     }
   })
 })

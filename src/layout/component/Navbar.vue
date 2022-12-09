@@ -2,20 +2,23 @@
   <div
     class="fixed top-0 right-0 w-navbarWidth h-navbarHeight flex items-center justify-between pl-10 pr-7 useDrag"
   >
-    <div class="text-xs flex noDrag text-noSelect">
-      <Icon
-        icon="fluent-mdl2:chevron-left"
-        :class="[routeHistory.hasPrev() ? 'text-[#777] cursor-pointer hover:text-primary' : '']"
-        @click="prev()"
-      />
-      <Icon
-        icon="fluent-mdl2:chevron-right"
-        :class="[
-          routeHistory.hasNext() ? 'text-[#777] cursor-pointer hover:text-primary' : '',
-          'ml-6',
-        ]"
-        @click="next()"
-      />
+    <div class="flex noDrag items-center">
+      <div class="text-xs flex text-noSelect">
+        <Icon
+          icon="fluent-mdl2:chevron-left"
+          :class="[routeHistory.hasPrev() ? 'text-[#777] cursor-pointer hover:text-primary' : '']"
+          @click="prev()"
+        />
+        <Icon
+          icon="fluent-mdl2:chevron-right"
+          :class="[
+            routeHistory.hasNext() ? 'text-[#777] cursor-pointer hover:text-primary' : '',
+            'ml-6',
+          ]"
+          @click="next()"
+        />
+      </div>
+      <SearchInput />
     </div>
     <div class="flex text-[#777] text-xs noDrag items-center">
       <div v-if="loginStatus === 0" class="flex items-center">
@@ -64,6 +67,7 @@ import LoginDialogVue from '@/components/LoginDialog.vue'
 import { ref } from 'vue'
 import { logout } from '@/api/login'
 import { ElMessageBox, ElMessage } from 'element-plus'
+import SearchInput from './SearchInput.vue'
 
 const baseStore = useBaseStore()
 const routeHistory = useRouteHistoryStore()

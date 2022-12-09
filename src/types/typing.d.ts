@@ -9,5 +9,6 @@ declare interface Window {
     closeApp: any
     once: any
     openDirDialog: any
+    openDir: any
   }
 }

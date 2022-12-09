@@ -6,6 +6,7 @@
     :show-close="true"
     class="loginDialog"
     :close-on-click-modal="false"
+    :draggable="true"
   >
     <div class="flex flex-col items-center h-[480px]">
       <div class="w-60 h-10 bg-[#F4F4F4] rounded-full mt-10 flex items-center justify-center">

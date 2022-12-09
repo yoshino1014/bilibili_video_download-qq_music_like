@@ -1,11 +1,12 @@
 'use strict'
 
-import { app, protocol, BrowserWindow, ipcMain, session, dialog } from 'electron'
+import { app, protocol, BrowserWindow, ipcMain, session, dialog, shell } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import got from 'got'
 import log from 'electron-log'
 import path from 'path'
 import ecStore from 'electron-store'
+import fs from 'fs'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 const store = new ecStore({
@@ -20,8 +21,8 @@ let win: BrowserWindow
 async function createWindow() {
   // Create the browser window.
   win = new BrowserWindow({
-    width: 1200,
-    height: 800,
+    width: 1020,
+    height: 690,
     minWidth: 1020,
     minHeight: 690,
     backgroundColor: '#f6f6f6',
@@ -109,6 +110,18 @@ ipcMain.handle('open-dir-dialog', () => {
     return Promise.resolve(filePaths[0])
   }
   return Promise.reject(new Error('not select'))
+})
+
+// 打开指定文件夹
+ipcMain.handle('open-dir', (event, path) => {
+  return new Promise((resolve, reject) => {
+    if (fs.existsSync(path)) {
+      shell.openPath(path)
+      resolve('即将打开文件夹')
+    } else {
+      reject('文件夹不存在')
+    }
+  })
 })
 
 // Quit when all windows are closed.

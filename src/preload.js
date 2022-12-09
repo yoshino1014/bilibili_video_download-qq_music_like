@@ -33,4 +33,7 @@ contextBridge.exposeInMainWorld('electronApi', {
   openDirDialog() {
     return ipcRenderer.invoke('open-dir-dialog')
   },
+  openDir(path) {
+    return ipcRenderer.invoke('open-dir', path)
+  },
 })

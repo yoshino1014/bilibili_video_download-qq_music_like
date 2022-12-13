@@ -1,9 +1,9 @@
 <template>
-  <div class="p-8 text-[13px] setting box-content max-w-[746px]">
+  <div class="setting text-[13px] p-8 box-content max-w-[746px]">
     <span class="text-2xl font-bold">设置</span>
     <!-- 下载目录 -->
     <div class="py-6 border-t border-t-[#dcdfe6] flex mt-5">
-      <span class="text-[#777] w-24 shrink-0">下载目录</span>
+      <span class="text-normal w-24 shrink-0">下载目录</span>
       <div>
         <span>默认将下载的视频保存在此文件夹中</span>
         <div class="mt-4 flex">
@@ -25,7 +25,7 @@
     </div>
     <!-- 下载视频 -->
     <div class="py-6 border-t border-t-[#dcdfe6] flex">
-      <span class="text-[#777] w-24 shrink-0">下载视频</span>
+      <span class="text-normal w-24 shrink-0">下载视频</span>
       <div class="flex flex-wrap">
         <el-checkbox v-model="setting.isCover" label="同时下载封面" />
         <el-checkbox v-model="setting.isSubtitle" label="同时下载字幕" />
@@ -34,7 +34,7 @@
     </div>
     <!-- 文件分类 -->
     <div class="py-6 border-t border-t-[#dcdfe6] flex">
-      <span class="text-[#777] w-24 shrink-0">文件分类</span>
+      <span class="text-normal w-24 shrink-0">文件分类</span>
       <div class="flex">
         <el-radio-group v-model="setting.isFolder">
           <el-radio :label="false">不分文件夹</el-radio>
@@ -44,7 +44,7 @@
     </div>
     <!-- 其它 -->
     <div class="py-6 border-t border-t-[#dcdfe6] flex">
-      <span class="text-[#777] w-24 shrink-0">其它</span>
+      <span class="text-normal w-24 shrink-0">其它</span>
       <div class="flex">
         <el-checkbox v-model="setting.isMerge" label="下载完成后合并音视频" />
         <el-checkbox v-model="setting.isDelete" label="删除原文件" :disabled="!setting.isMerge" />
@@ -57,7 +57,6 @@
 import { reactive, watch, onMounted, toRaw } from 'vue'
 import type { SettingData } from '@/types/index'
 import { ElMessage } from 'element-plus'
-import { storeToRefs } from 'pinia'
 import { useSettingStore } from '@/store/index'
 
 const settingStore = useSettingStore()

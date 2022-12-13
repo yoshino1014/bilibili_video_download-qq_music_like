@@ -52,7 +52,6 @@ const getMenuItem = (route: RouteRecordRaw): MenuOption => {
 }
 
 .normal {
-  color: #000;
   background: rgba($color: #000000, $alpha: 0);
 }
 

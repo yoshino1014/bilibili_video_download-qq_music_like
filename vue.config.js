@@ -6,6 +6,7 @@ module.exports = defineConfig({
   transpileDependencies: true,
   pluginOptions: {
     electronBuilder: {
+      externals: ['ffmpeg-static', 'fluent-ffmpeg'],
       nodeModulesPath: ['../../node_modules', './node_modules'],
       preload: 'src/preload.js',
     },

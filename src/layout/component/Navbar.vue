@@ -6,21 +6,21 @@
       <div class="text-xs flex text-noSelect">
         <Icon
           icon="fluent-mdl2:chevron-left"
-          :class="[routeHistory.hasPrev() ? 'text-[#777] cursor-pointer hover:text-primary' : '']"
+          :class="[routeHistory.hasPrev() ? 'text-normal cursor-pointer hover:text-primary' : '']"
           @click="prev()"
         />
         <Icon
           icon="fluent-mdl2:chevron-right"
           :class="[
-            routeHistory.hasNext() ? 'text-[#777] cursor-pointer hover:text-primary' : '',
+            routeHistory.hasNext() ? 'text-normal cursor-pointer hover:text-primary' : '',
             'ml-6',
           ]"
           @click="next()"
         />
       </div>
-      <SearchInput />
+      <SearchInput class="ml-6" />
     </div>
-    <div class="flex text-[#777] text-xs noDrag items-center">
+    <div class="flex text-normal text-xs noDrag items-center">
       <div v-if="loginStatus === 0" class="flex items-center">
         <img
           src="@/assets/avatar.gif"
@@ -61,7 +61,7 @@
 <script lang="ts" setup>
 import { Icon } from '@iconify/vue'
 import { useRouteHistoryStore, useBaseStore } from '@/store/index'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import LoginDialogVue from '@/components/LoginDialog.vue'
 import { ref } from 'vue'
@@ -72,6 +72,7 @@ import SearchInput from './SearchInput.vue'
 const baseStore = useBaseStore()
 const routeHistory = useRouteHistoryStore()
 const $router = useRouter()
+const $route = useRoute()
 const { loginStatus, username, avatar } = storeToRefs(baseStore)
 const loginDialog = ref<any>(null)
 
@@ -126,10 +127,25 @@ const quitLogin = async () => {
       } else {
         ElMessage('退出失败')
       }
+      refresh()
     })
     .catch(() => {
       console.log('已取消')
     })
+}
+
+const refresh = () => {
+  let query = {
+    t: 0,
+  }
+  if ($route.query) {
+    query = JSON.parse(JSON.stringify($route.query))
+  }
+  query.t = Date.now()
+  $router.push({
+    path: $route.path,
+    query,
+  })
 }
 </script>
 

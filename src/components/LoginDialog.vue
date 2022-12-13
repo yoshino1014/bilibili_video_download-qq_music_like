@@ -55,6 +55,7 @@ import { useBaseStore } from '@/store'
 import { ElMessage } from 'element-plus'
 import { Icon } from '@iconify/vue'
 import type { TokenData } from '@/types/index'
+import { useRouter, useRoute } from 'vue-router'
 
 const dialogVisible = ref<boolean>(false)
 const timeCounter = ref<number>(180)
@@ -65,6 +66,8 @@ const DedeUserID = ref<string>('')
 const biliJct = ref<string>('')
 const baseStore = useBaseStore()
 const ifLoginByQrCode = ref<boolean>(true)
+const $router = useRouter()
+const $route = useRoute()
 let timer: any = null
 
 const handleClose = (done: () => void) => {
@@ -143,6 +146,21 @@ const login = async () => {
   ElMessage({
     type: 'success',
     message: '登录成功',
+  })
+  refresh()
+}
+
+const refresh = () => {
+  let query = {
+    t: 0,
+  }
+  if ($route.query) {
+    query = JSON.parse(JSON.stringify($route.query))
+  }
+  query.t = Date.now()
+  $router.push({
+    path: $route.path,
+    query,
   })
 }
 

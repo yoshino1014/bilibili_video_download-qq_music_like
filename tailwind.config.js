@@ -6,6 +6,7 @@ module.exports = {
       colors: {
         primary: '#1ECD98',
         noSelect: '#D2D2D2',
+        normal: '#666666',
       },
       width: {
         siderbarWidth: '210px',

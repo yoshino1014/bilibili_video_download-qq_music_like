@@ -7,6 +7,8 @@ import log from 'electron-log'
 import path from 'path'
 import ecStore from 'electron-store'
 import fs from 'fs'
+import { downloadVideo } from '@/core/download'
+import type { TaskData, SettingData } from '@/types/index'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 const store = new ecStore({
@@ -122,6 +124,12 @@ ipcMain.handle('open-dir', (event, path) => {
       reject('文件夹不存在')
     }
   })
+})
+
+// 下载视频
+ipcMain.on('download-video', (event, { task, SESSDATA }: { task: TaskData; SESSDATA: string }) => {
+  const setting = store.get('setting')
+  downloadVideo(task, event, setting as SettingData, SESSDATA)
 })
 
 // Quit when all windows are closed.

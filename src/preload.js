@@ -36,4 +36,18 @@ contextBridge.exposeInMainWorld('electronApi', {
   openDir(path) {
     return ipcRenderer.invoke('open-dir', path)
   },
+  downloadVideo({ task, SESSDATA }) {
+    ipcRenderer.send('download-video', { task, SESSDATA })
+  },
+  on(channel, func) {
+    const validChannels = ['download-video-status', 'download-danmuku']
+    if (validChannels.includes(channel)) {
+      const subscription = (_event, ...args) => func(...args)
+      // Deliberately strip event as it includes `sender`
+      ipcRenderer.on(channel, subscription)
+
+      return () => ipcRenderer.removeListener(channel, subscription)
+    }
+    return undefined
+  },
 })

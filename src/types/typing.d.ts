@@ -10,5 +10,7 @@ declare interface Window {
     once: any
     openDirDialog: any
     openDir: any
+    downloadVideo: any
+    on: any
   }
 }

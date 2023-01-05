@@ -17,7 +17,7 @@
               :key="index"
               class="flex items-center shrink-0 mt-4 mr-5"
             >
-              <img :src="up.face" alt="up头像" class="w-7 h-7 rounded-full" />
+              <img :src="up.face" alt="" class="w-7 h-7 rounded-full" />
               <span class="text-xs ml-2"
                 >{{ up.title }}<span class="text-[#FB7299]">@{{ up.name }}</span></span
               >
@@ -56,12 +56,14 @@
         </div>
         <!-- 下载按钮 -->
         <el-button
-          class="absolute bottom-0 z-0"
+          class="absolute bottom-0 z-0 el-button-custom"
           :disabled="selected.length === 0"
           :loading="downloading"
           @click="handleDownload"
-          >点击下载</el-button
         >
+          <Icon icon="mdi:download" class="mr-1 text-lg"></Icon>
+          <span>点击下载</span>
+        </el-button>
       </div>
     </div>
     <!-- 获取长度用，无显示意义 -->
@@ -104,7 +106,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, nextTick, ref, toRaw } from 'vue'
+import { onActivated, onDeactivated, nextTick, ref, toRaw, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import {
   checkUrl,
@@ -114,15 +116,14 @@ import {
   addDownloadList,
 } from '@/core/bilibili'
 import { ElMessage, ElLoading, ElTable } from 'element-plus'
-import { useSettingStore, useBaseStore, useTaskStore } from '@/store/index'
+import { useBaseStore, useTaskStore } from '@/store/index'
 import type { VideoData, Page } from '@/types/index'
 import { Icon } from '@iconify/vue'
-import { downloadVideo } from '@/core/download'
+import { userQuality } from '@/assets/data/setting'
 
 const MAX_WIDTH = 385
 const LEFTFORTABLE = 364
 const $route = useRoute()
-const settingStore = useSettingStore()
 const baseStore = useBaseStore()
 const taskStore = useTaskStore()
 const videoInfo = ref<VideoData>({
@@ -152,11 +153,6 @@ const videoInfo = ref<VideoData>({
     video: '',
   },
 })
-const userQuality = {
-  0: [16, 32],
-  1: [16, 32, 64, 80],
-  2: [16, 32, 64, 74, 80, 112, 116, 120, 125, 126, 127],
-}
 const qualitySelect = ref<number>(-1)
 const selected = ref<number[]>([])
 const moreDesc = ref<boolean>(false)
@@ -203,6 +199,7 @@ onMounted(async () => {
     //显示窗口
     loading.close()
   } catch (error: any) {
+    console.error(error)
     ElMessage.error(`解析错误：${error}`)
   }
   descInner.value = videoInfo.value.desc
@@ -213,7 +210,7 @@ onMounted(async () => {
   window.addEventListener('resize', pageResize)
 })
 
-onBeforeUnmount(() => {
+onDeactivated(() => {
   window.removeEventListener('resize', pageResize, true)
 })
 
@@ -258,7 +255,6 @@ const handleDownload = async () => {
     }
   })
   downloading.value = false
-  // router.push('/download')
 }
 </script>
 
@@ -281,6 +277,21 @@ const handleDownload = async () => {
     }
     .el-radio__input.is-checked + .el-radio__label {
       color: var(--el-radio-text-color);
+    }
+  }
+
+  .el-checkbox {
+    height: auto;
+    width: 200px;
+    margin: 0;
+    --el-checkbox-text-color: #000;
+    --el-checkbox-checked-text-color: #000;
+    --el-checkbox-bg-color: rgba(0, 0, 0, 0);
+    --el-checkbox-checked-bg-color: rgba(0, 0, 0, 0);
+    --el-checkbox-checked-icon-color: var(--el-color-primary);
+    .el-checkbox__label {
+      line-height: 14px;
+      font-size: 13px;
     }
   }
 
@@ -312,46 +323,6 @@ const handleDownload = async () => {
     .el-table__inner-wrapper::before {
       height: 0;
     }
-  }
-
-  .el-checkbox {
-    height: auto;
-    width: 200px;
-    margin: 0;
-    --el-checkbox-text-color: #000;
-    --el-checkbox-checked-text-color: #000;
-    --el-checkbox-bg-color: rgba(0, 0, 0, 0);
-    --el-checkbox-checked-bg-color: rgba(0, 0, 0, 0);
-    --el-checkbox-checked-icon-color: var(--el-color-primary);
-    .el-checkbox__label {
-      line-height: 14px;
-      font-size: 13px;
-    }
-  }
-
-  .el-button {
-    --el-button-border-color: rgba(0, 0, 0, 0);
-
-    width: 110px;
-    height: 32px;
-    background-image: linear-gradient(to right, #1fd4ae, #1ecc95);
-    color: white;
-    font-size: 14px;
-    border-radius: 9999px;
-    border: none;
-    &:hover {
-      background-image: linear-gradient(to right, #1ec9a4, #1cb987);
-    }
-  }
-  .el-button.is-disabled {
-    background-image: none;
-    color: #333;
-    border: 1px solid #d2d2d2;
-  }
-  .el-button.is-loading {
-    position: absolute;
-    background-image: linear-gradient(to right, #1fd4ae, #1ecc95);
-    color: white;
   }
 }
 </style>

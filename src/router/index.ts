@@ -1,37 +1,43 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
-import Layout from '@/layout/index.vue'
 import HomeView from '../views/HomeView.vue'
 import { useRouteHistoryStore } from '@/store/index'
 
+const Layout = () => import('@/layout/index.vue')
 export const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'search',
     component: Layout,
     redirect: '/search',
-    meta: {
-      title: '搜索',
-      icon: 'mdi:magnify-expand',
-    },
     children: [
       {
+        name: 'userSearch',
         path: 'search',
         component: HomeView,
+        meta: {
+          title: '搜索用户',
+          icon: 'mdi:magnify-expand',
+          keepAlive: true,
+        },
       },
     ],
   },
   {
     path: '/videoDetail',
-    name: 'videoDetail',
+    name: 'video',
     component: Layout,
     meta: {
       isHidden: true,
-      title: '视频详情',
     },
     children: [
       {
         path: 'index',
+        name: 'videoDetail',
         component: () => import('@/views/VideoDetail.vue'),
+        meta: {
+          title: '视频详情',
+          keepAlive: false,
+        },
       },
     ],
   },
@@ -39,15 +45,16 @@ export const routes: Array<RouteRecordRaw> = [
     path: '/collection',
     name: 'collection',
     component: Layout,
-    meta: {
-      // isHidden: true,
-      title: '个人收藏',
-      icon: 'mdi:star-outline',
-    },
     children: [
       {
         path: 'index',
+        name: 'userCollection',
         component: () => import('@/views/Collection.vue'),
+        meta: {
+          title: '个人收藏',
+          icon: 'mdi:star-outline',
+          keepAlive: false,
+        },
       },
     ],
   },
@@ -55,15 +62,16 @@ export const routes: Array<RouteRecordRaw> = [
     path: '/download',
     name: 'download',
     component: Layout,
-    meta: {
-      // isHidden: true,
-      title: '下载列表',
-      icon: 'mdi:cloud-download',
-    },
     children: [
       {
         path: 'index',
+        name: 'downloadList',
         component: () => import('@/views/DownloadList.vue'),
+        meta: {
+          title: '下载列表',
+          icon: 'mdi:cloud-download',
+          keepAlive: true,
+        },
       },
     ],
   },
@@ -71,30 +79,35 @@ export const routes: Array<RouteRecordRaw> = [
     path: '/setting',
     name: 'setting',
     component: Layout,
-    meta: {
-      // isHidden: true,
-      title: '设置',
-      icon: 'mdi:cog',
-    },
     children: [
       {
         path: 'index',
+        name: 'downloadSetting',
         component: () => import('@/views/Setting.vue'),
+        meta: {
+          title: '设置',
+          icon: 'mdi:cog',
+          keepAlive: true,
+        },
       },
     ],
   },
   {
-    path: '/uploadVideo',
-    name: 'uploadVideo',
+    path: '/userVideo',
+    name: 'videoList',
     component: Layout,
     meta: {
       isHidden: true,
-      title: '投稿视频',
     },
     children: [
       {
         path: 'index',
-        component: () => import('@/views/UploadVideo.vue'),
+        name: 'userVideo',
+        component: () => import('@/views/UserVideo.vue'),
+        meta: {
+          title: '投稿视频',
+          keepAlive: true,
+        },
       },
     ],
   },

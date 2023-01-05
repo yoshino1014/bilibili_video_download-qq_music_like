@@ -1,6 +1,16 @@
 'use strict'
 
-import { app, protocol, BrowserWindow, ipcMain, session, dialog, shell } from 'electron'
+import {
+  app,
+  protocol,
+  BrowserWindow,
+  ipcMain,
+  session,
+  dialog,
+  shell,
+  Menu,
+  MenuItemConstructorOptions,
+} from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import got from 'got'
 import log from 'electron-log'
@@ -126,10 +136,74 @@ ipcMain.handle('open-dir', (event, path) => {
   })
 })
 
+// 获取视频大小
+ipcMain.handle('get-video-size', (event, id: string) => {
+  const task = store.get(`taskList.${id}`) as TaskData
+  if (task && task.filePathList) {
+    try {
+      const stat = fs.statSync(task.filePathList[0])
+      return Promise.resolve(stat.size)
+    } catch (error: any) {
+      log.error(`get-video-size error: ${error.message}`)
+    }
+    try {
+      const stat1 = fs.statSync(task.filePathList[2])
+      const stat2 = fs.statSync(task.filePathList[3])
+      return Promise.resolve(stat1.size + stat2.size)
+    } catch (error) {
+      return Promise.resolve(0)
+    }
+  }
+})
+
 // 下载视频
 ipcMain.on('download-video', (event, { task, SESSDATA }: { task: TaskData; SESSDATA: string }) => {
   const setting = store.get('setting')
   downloadVideo(task, event, setting as SettingData, SESSDATA)
+})
+
+// 右键菜单
+ipcMain.handle('open-menu', (event) => {
+  return new Promise((resolve) => {
+    const template: MenuItemConstructorOptions[] = [
+      {
+        label: '删除任务',
+        type: 'normal',
+        click: () => resolve('delete'),
+      },
+      {
+        label: '重新下载',
+        type: 'normal',
+        click: () => resolve('reload'),
+      },
+      {
+        label: '浏览本地文件',
+        type: 'normal',
+        click: () => resolve('open'),
+      },
+      {
+        label: '全选',
+        type: 'normal',
+        click: () => resolve('selectAll'),
+      },
+      // {
+      //   label: '播放视频',
+      //   type: 'normal',
+      //   click: () => resolve('play'),
+      // },
+    ]
+    const contextMenu = Menu.buildFromTemplate(template)
+    contextMenu.popup({ window: win })
+  })
+})
+
+// 浏览本地文件
+ipcMain.handle('show-local-file', (event, path: string) => {
+  if (fs.existsSync(path)) {
+    shell.showItemInFolder(path)
+    return Promise.resolve('success')
+  }
+  return Promise.reject('No Exist')
 })
 
 // Quit when all windows are closed.

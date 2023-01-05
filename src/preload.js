@@ -50,4 +50,13 @@ contextBridge.exposeInMainWorld('electronApi', {
     }
     return undefined
   },
+  getVideoSize(id) {
+    return ipcRenderer.invoke('get-video-size', id)
+  },
+  openMenu() {
+    return ipcRenderer.invoke('open-menu')
+  },
+  showFile(path) {
+    return ipcRenderer.invoke('show-local-file', path)
+  },
 })

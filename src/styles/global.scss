@@ -1,6 +1,6 @@
 html,
 body {
-  width: 100%;
+  width: 100% !important;
   height: 100%;
   overflow: hidden;
 }
@@ -122,6 +122,7 @@ img:not(.no) {
 /* element ui */
 :root {
   --el-overlay-color-lighter: rgba(0, 0, 0, 0);
-  --el-color-primary: #1ecd98;
+  --el-color-primary: #1cc498;
   --el-border-color: #d2d2d2;
+  --el-text-color-primary: #333;
 }

@@ -10,8 +10,12 @@ export const useTaskStore = defineStore('task', {
     }
   },
   getters: {
-    taskListArray(state) {
-      return Array.from(state.taskMap)
+    taskArray(state) {
+      const array: TaskData[] = []
+      state.taskMap.forEach((value) => {
+        array.unshift(value)
+      })
+      return array
     },
   },
   actions: {

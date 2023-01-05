@@ -102,6 +102,16 @@ export interface VideoData {
 export interface TaskData extends VideoData {
   status: number
   progress: number
+  completeTime: number
+  speed?: number
 }
 
 export type TaskMap = Map<string, TaskData>
+
+export interface UserData {
+  mid: string
+  name: string
+  face: string
+  sign: string
+  level: number
+}

@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full h-full">
+  <div class="w-full" style="height: calc(100vh - 75px)">
     <Siderbar />
     <Navbar />
     <AppMain class="ml-mainLeft mt-mainTop" />

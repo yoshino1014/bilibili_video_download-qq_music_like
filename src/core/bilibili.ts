@@ -108,7 +108,15 @@ const parseBV = async (html: string, url: string) => {
     if (!videoInfo) {
       throw new Error('parse bv error')
     }
-    const { videoData, tags } = JSON.parse(videoInfo[1])
+    const videoInfoJSON = JSON.parse(videoInfo[1])
+    if (videoInfoJSON.epInfo) {
+      // 为番剧
+      return parseEP(
+        html,
+        `https://www.bilibili.com/bangumi/play/ep${videoInfoJSON.mediaInfo.newestEp.id}`
+      )
+    }
+    const { videoData, tags } = videoInfoJSON
     // 获取视频下载地址
     let acceptQuality = null
     try {
@@ -251,7 +259,7 @@ const parseEP = async (html: string, url: string) => {
     }
     const obj: VideoData = {
       id: '',
-      title: h1Title,
+      title: mediaInfo.season_title,
       url,
       bvid: epInfo.bvid,
       cid: epInfo.cid,
@@ -262,7 +270,10 @@ const parseEP = async (html: string, url: string) => {
       danmaku: mediaInfo.stat.danmakus,
       reply: mediaInfo.stat.reply,
       duration: formatSecond(epInfo.duration / 1000),
-      up: [{ name: mediaInfo.upInfo.name, mid: mediaInfo.upInfo.mid, face: mediaInfo.upInfo.face }],
+      up: [
+        { name: mediaInfo.upInfo.name, mid: mediaInfo.upInfo.mid, face: mediaInfo.upInfo.avatar },
+      ],
+      desc: mediaInfo.evaluate,
       qualityOptions: acceptQuality.accept_quality.map((item: any) => ({
         label: qualityMap[item],
         value: item,
@@ -369,8 +380,8 @@ const handleFilePathList = (
 ): string[] => {
   const settingStore = useSettingStore()
   const downloadPath = settingStore.downloadPath
-  const pageName = `${!page ? '' : `[P${page}]`}${filterTitle(`${title}-${up}-${bvid}`)}`
-  const dirName = `${filterTitle(`${name}-${up}-${bvid}`)}`
+  const pageName = `${!page ? '' : `[P${page}]`}${filterTitle(`${title}-${up}`)}`
+  const dirName = `${filterTitle(`${name}-${up}`)}`
   const isFolder = settingStore.isFolder
   return [
     `${downloadPath}\\${isFolder ? `${dirName}\\` : ''}${pageName}.mp4`,
@@ -385,7 +396,7 @@ const handleFilePathList = (
 const handleFileDir = (page: number, title: string, up: string, bvid: string): string => {
   const settingStore = useSettingStore()
   const downloadPath = settingStore.downloadPath
-  const name = `${filterTitle(`${title}-${up}-${bvid}`)}`
+  const name = `${filterTitle(`${title}-${up}`)}`
   const isFolder = settingStore.isFolder
   return `${downloadPath}${isFolder ? `\\${name}\\` : ''}`
 }
@@ -501,22 +512,22 @@ export const addDownloadList = (videoList: VideoData[] | TaskData[]): TaskData[]
   const downloadingCount = taskStore.downloadingTaskCount
   const count = max - downloadingCount
   const taskList: TaskData[] = []
-  if (count >= 0) {
-    videoList.forEach((videoData, index) => {
-      if (index < count) {
-        taskList.push({
-          ...videoData,
-          status: 1,
-          progress: 0,
-        })
-      } else {
-        taskList.push({
-          ...videoData,
-          status: 4,
-          progress: 0,
-        })
-      }
-    })
-  }
+  videoList.forEach((videoData, index) => {
+    if (index < count) {
+      taskList.push({
+        ...videoData,
+        status: 1,
+        progress: 0,
+        completeTime: -1,
+      })
+    } else {
+      taskList.push({
+        ...videoData,
+        status: 4,
+        progress: 0,
+        completeTime: -1,
+      })
+    }
+  })
   return taskList
 }

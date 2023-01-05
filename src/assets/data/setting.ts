@@ -107,4 +107,10 @@ const settingRules = {
 }
 const loginStatusText = ['未登录，点击登录', '普通用户，点击退出', '大会员，点击退出']
 
-export { settingFormConfig, settingFormData, settingRules }
+const userQuality = {
+  0: [16, 32],
+  1: [16, 32, 64, 80],
+  2: [16, 32, 64, 74, 80, 112, 116, 120, 125, 126, 127],
+}
+
+export { settingFormConfig, settingFormData, settingRules, userQuality }

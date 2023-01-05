@@ -12,5 +12,8 @@ declare interface Window {
     openDir: any
     downloadVideo: any
     on: any
+    getVideoSize: any
+    openMenu: any
+    showFile: any
   }
 }

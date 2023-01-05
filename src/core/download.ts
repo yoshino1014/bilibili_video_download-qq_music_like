@@ -18,6 +18,8 @@ export const downloadVideo = async (
 ) => {
   let videoLastTime = 0
   let audioLastTime = 0
+  let videoLastTransferred = 0
+  let audioLastTransferred = 0
   // 去掉扩展名的文件路径
   const fileName = task.filePathList[0].substring(0, task.filePathList[0].length - 4)
   const imageConfig = {
@@ -37,14 +39,14 @@ export const downloadVideo = async (
     try {
       fs.mkdirSync(task.fileDir)
     } catch (err) {
-      console.log(err)
+      console.error(err)
     }
   }
   // 下载封面
   if (setting.isCover) {
     await pipeline(
       got.stream(task.cover, imageConfig).on('error', (error: Error) => {
-        console.log(error)
+        console.error(error)
       }),
       fs.createWriteStream(task.filePathList[1])
     )
@@ -57,15 +59,17 @@ export const downloadVideo = async (
   await pipeline(
     got
       .stream(task.downloadUrl.video, downloadConfig)
-      .on('downloadProgress', (progress: { percent: number }) => {
+      .on('downloadProgress', (progress: { percent: number; transferred: number }) => {
         const nowTime = +new Date()
         if (!videoLastTime || nowTime - videoLastTime > 1000) {
           event.reply('download-video-status', {
             id: task.id,
             status: 1,
             progress: Math.round(progress.percent * 100 * 0.75),
+            speed: progress.transferred - videoLastTransferred,
           })
           videoLastTime = nowTime
+          videoLastTransferred = progress.transferred
         }
       })
       .on('error', (error: any) => {
@@ -74,6 +78,7 @@ export const downloadVideo = async (
           id: task.id,
           status: 5,
           progress: 100,
+          speed: 0,
         })
       }),
     fs.createWriteStream(task.filePathList[2])
@@ -89,8 +94,10 @@ export const downloadVideo = async (
             id: task.id,
             status: 2,
             progress: Math.round(progress.percent * 100 * 0.22 + 75),
+            speed: progress.transferred - audioLastTransferred,
           })
           audioLastTime = nowTime
+          audioLastTransferred = progress.transferred
         }
       })
       .on('error', (error: any) => {
@@ -99,6 +106,7 @@ export const downloadVideo = async (
           id: task.id,
           status: 5,
           progress: 100,
+          speed: 0,
         })
       }),
     fs.createWriteStream(task.filePathList[3])

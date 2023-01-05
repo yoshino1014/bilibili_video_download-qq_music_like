@@ -170,7 +170,7 @@ const refresh = () => {
   }
   .el-message-box__btns button:nth-child(1) {
     background-color: #e3e3e3;
-    color: black;
+    color: #333;
     &:hover {
       background-color: #c4c4c4;
     }

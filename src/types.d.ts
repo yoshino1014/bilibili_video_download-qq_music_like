@@ -3,4 +3,5 @@ export interface MenuOption {
   key: any
   path: string
   icon: any
+  children?: any[]
 }

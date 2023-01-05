@@ -4,6 +4,7 @@
       v-model="searchValue"
       :spellcheck="false"
       placeholder="视频网址"
+      clearable
       @keydown.enter="toDetailPage"
     >
       <template #suffix>

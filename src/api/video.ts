@@ -13,6 +13,7 @@ export function getPalyUrl(params: PlayeurlParam, SESSDATA: string): Promise<any
   })
 }
 
+// 获得番剧信息
 export function getEpInfo(id: string, SESSDATA: string): Promise<any> {
   return window.electronApi.got(`https://www.bilibili.com/bangumi/play/ep${id}`, {
     headers: {
@@ -22,6 +23,7 @@ export function getEpInfo(id: string, SESSDATA: string): Promise<any> {
   })
 }
 
+// 视频字幕信息
 export function getMoreVideoInfo(cid: number, bvid: string, SESSDATA: string): Promise<any> {
   return window.electronApi.got(`https://api.bilibili.com/x/player/v2?cid=${cid}&bvid=${bvid}`, {
     headers: {
@@ -29,5 +31,23 @@ export function getMoreVideoInfo(cid: number, bvid: string, SESSDATA: string): P
       cookie: `SESSDATA=${SESSDATA}`,
     },
     responseType: 'json',
+  })
+}
+
+//热门视频
+export function getPopularVideo(
+  SESSDATA: string,
+  { pn, ps }: { pn: number; ps: number }
+): Promise<any> {
+  return window.electronApi.got(`https://api.bilibili.com/x/web-interface/popular`, {
+    headers: {
+      'User-Agent': `${UA}`,
+      cookie: `SESSDATA=${SESSDATA}`,
+    },
+    responseType: 'json',
+    searchParams: {
+      ps,
+      pn,
+    },
   })
 }

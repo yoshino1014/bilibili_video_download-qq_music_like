@@ -6,7 +6,7 @@ import UA from '@/assets/data/userAgent'
  */
 export function getLoginUrl(): Promise<any> {
   return window.electronApi.got(
-    'http://passport.bilibili.com/x/passport-login/web/qrcode/generate',
+    'https://passport.bilibili.com/x/passport-login/web/qrcode/generate',
     {
       responseType: 'json',
     }

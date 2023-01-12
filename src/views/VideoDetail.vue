@@ -3,7 +3,15 @@
     <!-- 详情 -->
     <div class="flex">
       <!-- 封面 -->
-      <img :src="videoInfo.cover" alt="封面" class="h-44 w-auto rounded-lg" />
+      <div class="h-44 max-w-[302px] overflow-hidden flex justify-center items-center rounded-lg">
+        <el-image
+          :src="videoInfo.cover"
+          :preview-src-list="[videoInfo.cover]"
+          alt="封面"
+          class="w-full h-auto"
+        />
+      </div>
+
       <!-- 信息 -->
       <div class="ml-6 relative">
         <div class="text-2xl font-bold ellipsis-1 w-[420px]" :title="videoInfo.title">
@@ -19,7 +27,10 @@
             >
               <img :src="up.face" alt="" class="w-7 h-7 rounded-full" />
               <span class="text-xs ml-2"
-                >{{ up.title }}<span class="text-[#FB7299]">@{{ up.name }}</span></span
+                >{{ up.title
+                }}<span class="text-[#FB7299] cursor-pointer" @click="toUserPage(up.mid + '')"
+                  >@{{ up.name }}</span
+                ></span
               >
             </div>
           </div>
@@ -107,7 +118,7 @@
 
 <script setup lang="ts">
 import { onActivated, onDeactivated, nextTick, ref, toRaw, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import {
   checkUrl,
   checkUrlRedirect,
@@ -121,9 +132,10 @@ import type { VideoData, Page } from '@/types/index'
 import { Icon } from '@iconify/vue'
 import { userQuality } from '@/assets/data/setting'
 
-const MAX_WIDTH = 385
+const MAX_WIDTH = 380
 const LEFTFORTABLE = 364
 const $route = useRoute()
+const $router = useRouter()
 const baseStore = useBaseStore()
 const taskStore = useTaskStore()
 const videoInfo = ref<VideoData>({
@@ -255,6 +267,12 @@ const handleDownload = async () => {
     }
   })
   downloading.value = false
+}
+const toUserPage = (mid: string) => {
+  $router.push({
+    path: '/userVideo/index',
+    query: { search: mid, t: Date.now() },
+  })
 }
 </script>
 

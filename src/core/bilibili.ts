@@ -5,6 +5,9 @@ import { getPalyUrl, getEpInfo, getMoreVideoInfo } from '@/api/video'
 import { formatSecond, filterTitle } from './utils'
 import { useBaseStore, useSettingStore, useTaskStore } from '@/store'
 import { v4 as uuidv4 } from 'uuid'
+import { userQuality } from '@/assets/data/setting'
+import { Ref } from 'vue'
+import { ElLoading, ElMessage } from 'element-plus'
 
 const qualityMap = {
   127: '8K 超高清',
@@ -530,4 +533,50 @@ export const addDownloadList = (videoList: VideoData[] | TaskData[]): TaskData[]
     }
   })
   return taskList
+}
+
+export const justDownload = async (
+  bvid: string,
+  loadingElement: HTMLElement | undefined,
+  baseStore: any,
+  taskStore: any
+) => {
+  const url = 'https://www.bilibili.com/video/' + bvid
+  const loading = ElLoading.service({
+    target: loadingElement,
+    lock: true,
+    text: 'Loading',
+    background: '#f6f6f6',
+  })
+  const { body, videoUrl } = await checkUrlRedirect(url, baseStore.token.SESSDATA)
+  try {
+    const data = await parseHtml(body, 'BV', videoUrl)
+    if (data === -1) {
+      ElMessage.error('解析错误或者不支持当前视频')
+      return
+    }
+    const acceptQuality = userQuality[baseStore.loginStatus]
+    // 根据当前登录状态加载清晰度
+    data.qualityOptions = data.qualityOptions.filter((item) => {
+      return acceptQuality.includes(item.value)
+    })
+    // 所有分P
+    const pages = data.page.map((page) => {
+      return page.page
+    })
+    const downloadList = await getDownloadList(data, pages, data.qualityOptions[0].value)
+    const taskList = addDownloadList(downloadList)
+    taskStore.updateTaskMap(taskList)
+    taskList.forEach((task) => {
+      if (task.status === 1) {
+        // 下载
+        window.electronApi.downloadVideo({ task, SESSDATA: baseStore.token.SESSDATA })
+        // 计数+1
+        taskStore.downloadingTaskCount++
+      }
+    })
+    loading.close()
+  } catch (error: any) {
+    console.error(error)
+  }
 }

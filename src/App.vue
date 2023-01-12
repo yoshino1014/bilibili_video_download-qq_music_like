@@ -41,7 +41,6 @@ onMounted(() => {
       settingStore.setSetting(setting)
     }
     // 初始化下载任务
-    await window.electronApi.deleteStore('taskList')
     const taskList = (await window.electronApi.getStore('taskList')) as TaskData[]
     const taskMap = new Map<string, TaskData>()
     for (const key in taskList) {

@@ -111,6 +111,25 @@ export const routes: Array<RouteRecordRaw> = [
       },
     ],
   },
+  {
+    path: '/collectionVideo',
+    name: 'collectionVideoList',
+    component: Layout,
+    meta: {
+      isHidden: true,
+    },
+    children: [
+      {
+        path: 'index',
+        name: 'collectionVideo',
+        component: () => import('@/views/CollectionVideo.vue'),
+        meta: {
+          title: '收藏夹内容',
+          keepAlive: true,
+        },
+      },
+    ],
+  },
 ]
 
 const router = createRouter({

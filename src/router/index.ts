@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import { useRouteHistoryStore } from '@/store/index'
+import { useBaseStore } from '@/store/index'
+import { ElMessage } from 'element-plus'
 
 const Layout = () => import('@/layout/index.vue')
 export const routes: Array<RouteRecordRaw> = [
@@ -59,6 +61,26 @@ export const routes: Array<RouteRecordRaw> = [
     ],
   },
   {
+    path: '/follow',
+    name: 'follow',
+    component: Layout,
+    meta: {
+      isHidden: false,
+    },
+    children: [
+      {
+        path: 'index',
+        name: 'followList',
+        component: () => import('@/views/FollowList.vue'),
+        meta: {
+          title: '关注列表',
+          icon: 'mdi:account-circle-outline',
+          keepAlive: false,
+        },
+      },
+    ],
+  },
+  {
     path: '/download',
     name: 'download',
     component: Layout,
@@ -68,7 +90,7 @@ export const routes: Array<RouteRecordRaw> = [
         name: 'downloadList',
         component: () => import('@/views/DownloadList.vue'),
         meta: {
-          title: '下载列表',
+          title: '下载',
           icon: 'mdi:cloud-download',
           keepAlive: true,
         },
@@ -137,7 +159,14 @@ const router = createRouter({
   routes,
 })
 
+const NeedLogin = ['userCollection', 'collectionVideo', 'followList']
+
 router.beforeEach((to, from) => {
+  const baseStore = useBaseStore()
+  if (NeedLogin.includes(to.name as string) && baseStore.token.SESSDATA === '') {
+    ElMessage.warning('未登录，登录后查看')
+    return '/search'
+  }
   const routeHistory = useRouteHistoryStore()
   if (!routeHistory.backOrForward) {
     routeHistory.pushRoute(to.fullPath)

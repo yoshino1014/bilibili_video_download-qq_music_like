@@ -23,3 +23,15 @@ export function getVideoList(searchParams: any, SESSDATA: string): Promise<any> 
     searchParams,
   })
 }
+
+// 关注列表
+export function getFollowing(searchParams: any, SESSDATA: string): Promise<any> {
+  return window.electronApi.got(`https://api.bilibili.com/x/relation/followings`, {
+    headers: {
+      'User-Agent': `${UA}`,
+      cookie: `SESSDATA=${SESSDATA}`,
+    },
+    responseType: 'json',
+    searchParams,
+  })
+}

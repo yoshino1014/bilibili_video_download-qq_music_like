@@ -59,4 +59,7 @@ contextBridge.exposeInMainWorld('electronApi', {
   showFile(path) {
     return ipcRenderer.invoke('show-local-file', path)
   },
+  openBrowser(url) {
+    ipcRenderer.send('open-browser', url)
+  },
 })

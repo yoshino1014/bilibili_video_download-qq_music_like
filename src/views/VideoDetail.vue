@@ -75,6 +75,14 @@
           <Icon icon="mdi:download" class="mr-1 text-lg"></Icon>
           <span>点击下载</span>
         </el-button>
+        <el-button
+          class="absolute bottom-0 left-32 z-0 rounded-full"
+          :loading="downloading"
+          @click="openBrowser(videoInfo.url)"
+        >
+          <Icon icon="mdi:open-in-app" class="mr-1 text-lg"></Icon>
+          <span>打开B站</span>
+        </el-button>
       </div>
     </div>
     <!-- 获取长度用，无显示意义 -->
@@ -117,7 +125,7 @@
 </template>
 
 <script setup lang="ts">
-import { onActivated, onDeactivated, nextTick, ref, toRaw, onMounted } from 'vue'
+import { onDeactivated, nextTick, ref, toRaw, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   checkUrl,
@@ -273,6 +281,9 @@ const toUserPage = (mid: string) => {
     path: '/userVideo/index',
     query: { search: mid, t: Date.now() },
   })
+}
+const openBrowser = (url: string) => {
+  window.electronApi.openBrowser(url)
 }
 </script>
 

@@ -15,5 +15,6 @@ declare interface Window {
     getVideoSize: any
     openMenu: any
     showFile: any
+    openBrowser: any
   }
 }

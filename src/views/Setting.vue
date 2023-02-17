@@ -29,7 +29,7 @@
       <div class="flex flex-wrap">
         <el-checkbox v-model="setting.isCover" label="同时下载封面" />
         <el-checkbox v-model="setting.isSubtitle" label="同时下载字幕" />
-        <el-checkbox v-model="setting.isDanmaku" label="同时下载弹幕" />
+        <el-checkbox v-model="setting.isDanmaku" label="同时下载弹幕(还没做٩꒰｡•◡•｡꒱۶)" />
       </div>
     </div>
     <!-- 文件分类 -->

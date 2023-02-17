@@ -28,7 +28,6 @@ const store = new ecStore({
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } },
 ])
-
 let win: BrowserWindow
 async function createWindow() {
   // Create the browser window.
@@ -68,7 +67,7 @@ function init() {
 }
 
 // 发送get请求
-ipcMain.handle('got', (event, url, option) => {
+ipcMain.handle('got', async (event, url, option) => {
   return new Promise((resolve, reject) => {
     got(url, option)
       .then((res: any) => {
@@ -239,9 +238,9 @@ app.on('ready', async () => {
     // } catch (e) {
     //   console.error('Vue Devtools failed to install:', (e as Error).toString())
     // }
-    await session.defaultSession.loadExtension(
-      'C:\\Users\\11720\\AppData\\Local\\Microsoft\\Edge\\User Data\\Profile 1\\Extensions\\olofadcdnkkjdfgjcmjaadnlehnnihnl\\6.4.5_0'
-    )
+    // await session.defaultSession.loadExtension(
+    //   'C:\\Users\\11720\\AppData\\Local\\Microsoft\\Edge\\User Data\\Profile 1\\Extensions\\olofadcdnkkjdfgjcmjaadnlehnnihnl\\6.5.0_0'
+    // )
   }
   createWindow()
   init()

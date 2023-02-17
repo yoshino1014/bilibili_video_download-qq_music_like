@@ -169,4 +169,7 @@ window.electronApi.on(
     }
   }
 }
+.keyword {
+  color: #f25d8e;
+}
 </style>

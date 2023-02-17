@@ -77,7 +77,6 @@
         </el-button>
         <el-button
           class="absolute bottom-0 left-32 z-0 rounded-full"
-          :loading="downloading"
           @click="openBrowser(videoInfo.url)"
         >
           <Icon icon="mdi:open-in-app" class="mr-1 text-lg"></Icon>

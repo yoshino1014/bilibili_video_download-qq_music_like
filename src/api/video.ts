@@ -51,3 +51,32 @@ export function getPopularVideo(
     },
   })
 }
+
+//sousuo
+export function search(
+  SESSDATA: string,
+  headers: any,
+  {
+    search_type,
+    keyword,
+    order,
+    page,
+  }: { search_type: string; keyword: string; order: string; page: number }
+): Promise<any> {
+  return window.electronApi.got(`https://api.bilibili.com/x/web-interface/search/type`, {
+    headers: {
+      'User-Agent': `${UA}`,
+      cookie: `SESSDATA=${SESSDATA};` + headers,
+    },
+    responseType: 'json',
+    searchParams: { search_type, keyword, order, page },
+  })
+}
+
+export function getCookies(): Promise<any> {
+  return window.electronApi.got(`https://www.bilibili.com`, {
+    headers: {
+      'User-Agent': `${UA}`,
+    },
+  })
+}

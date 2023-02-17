@@ -6,7 +6,6 @@ import { formatSecond, filterTitle } from './utils'
 import { useBaseStore, useSettingStore, useTaskStore } from '@/store'
 import { v4 as uuidv4 } from 'uuid'
 import { userQuality } from '@/assets/data/setting'
-import { Ref } from 'vue'
 import { ElLoading, ElMessage } from 'element-plus'
 
 const qualityMap = {
@@ -132,8 +131,8 @@ const parseBV = async (html: string, url: string) => {
       downLoadData = JSON.parse(downLoadData[1])
       acceptQuality = {
         accept_quality: downLoadData.data.accept_quality,
-        video: downLoadData.data.dash.video,
-        audio: downLoadData.data.dash.audio,
+        video: downLoadData.data.dash?.video,
+        audio: downLoadData.data.dash?.audio,
       }
     } catch (error) {
       acceptQuality = await getAcceptQuality(videoData.cid, videoData.bvid)
@@ -383,7 +382,7 @@ const handleFilePathList = (
 ): string[] => {
   const settingStore = useSettingStore()
   const downloadPath = settingStore.downloadPath
-  const pageName = `${!page ? '' : `[P${page}]`}${filterTitle(`${title}-${up}`)}`
+  const pageName = `${!page ? '' : `${filterTitle(name)}[P${page}]`}${filterTitle(`${title}`)}`
   const dirName = `${filterTitle(`${name}-${up}`)}`
   const isFolder = settingStore.isFolder
   return [

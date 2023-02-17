@@ -86,7 +86,12 @@
                 @click.shift.exact="rangeSelect(index)"
                 @click.right="showContextmenu(task)"
               >
-                <div class="flex-1 ellipsis-1 px-3">{{ task.title }}</div>
+                <div class="flex-1 ellipsis-1 px-3">
+                  <span class="text-red-500 font-bold">
+                    {{ task.status === 5 ? '下载失败' : '' }}
+                  </span>
+                  {{ task.title }}
+                </div>
                 <div class="w-44 ellipsis-1 px-3">{{ task.up[0].name }}</div>
                 <div class="w-28 ellipsis-1 px-3">{{ formatVideoSize(task.size) }}</div>
                 <div class="w-28 ellipsis-1 px-3">{{ task.duration }}</div>
@@ -109,7 +114,7 @@ import { useTaskStore, useSettingStore, useBaseStore } from '@/store'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { ElMessageBox, ElMessage } from 'element-plus'
-import { TaskData } from '@/types/index'
+import type { TaskData } from '@/types/index'
 import {
   checkUrl,
   checkUrlRedirect,
@@ -165,15 +170,22 @@ const formatVideoSize = (size: number | undefined) => {
 }
 
 const downloadingArray = computed(() => {
-  return taskArray.value.filter((item) => {
-    return item.status !== 0
-  })
+  return taskArray.value
+    .filter((item) => {
+      return item.status !== 0 && item.status !== 5
+    })
+    .sort((a, b) => {
+      if (a.status === 1 && b.status === 2) {
+        return 0
+      }
+      return a.status - b.status
+    })
 })
 
 const completedArray = computed(() => {
   return taskArray.value
     .filter((item) => {
-      return item.status === 0
+      return item.status === 0 || item.status === 5
     })
     .sort((a, b) => {
       return b.completeTime - a.completeTime
@@ -412,6 +424,9 @@ const reloadDownload = async (id: string) => {
   .el-progress-bar__inner,
   .el-progress-bar__outer {
     border-radius: 0% !important;
+  }
+  .el-progress-bar__inner {
+    text-align: left;
   }
 }
 </style>

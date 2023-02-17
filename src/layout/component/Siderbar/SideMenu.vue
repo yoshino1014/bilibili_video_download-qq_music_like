@@ -12,7 +12,7 @@
       <Icon :icon="route.icon" class="text-xl" />
       <span class="cursor-pointer ml-2">{{
         route.label +
-        (route.label === '下载列表'
+        (route.label === '下载'
           ? downloadingArray.length === 0
             ? ''
             : downloadingArray.length

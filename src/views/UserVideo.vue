@@ -12,6 +12,13 @@
           <div class="text-xs text-normal mt-6 w-[420px]">
             {{ userInfo.sign }}
           </div>
+          <el-button
+            class="absolute bottom-0 left0 z-0 rounded-full"
+            @click="openBrowser(`https://space.bilibili.com/${userInfo.mid}/video`)"
+          >
+            <Icon icon="mdi:open-in-app" class="mr-1 text-lg"></Icon>
+            <span>打开B站</span>
+          </el-button>
         </div>
       </div>
       <!-- 查询条件 -->
@@ -157,6 +164,7 @@ const handleCurrentChange = async () => {
       },
     },
   } = await getVideoList(toRaw(querParam), baseStore.token.SESSDATA)
+  vList.value = []
   vList.value = vlist
   total.value = count
 }
@@ -164,6 +172,10 @@ const handleCurrentChange = async () => {
 const handleOrder = (key: string) => {
   querParam.order = key
   handleCurrentChange()
+}
+
+const openBrowser = (url: string) => {
+  window.electronApi.openBrowser(url)
 }
 </script>
 

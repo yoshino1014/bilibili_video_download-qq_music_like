@@ -22,7 +22,6 @@ export const useBaseStore = defineStore('base', {
   actions: {
     setToken(token: TokenData) {
       this.token = token
-      console.log(this.token)
       window.electronApi.setStore('token', token)
     },
   },

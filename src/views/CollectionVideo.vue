@@ -35,11 +35,7 @@
       </div>
       <!-- 列表 -->
       <div class="flex flex-wrap">
-        <div
-          v-for="(video, index) in vList"
-          :key="index"
-          class="w-1/4 p-[10px] relative video-card"
-        >
+        <div v-for="(video, index) in vList" :key="index" class="w-1/4 p-[10px] relative">
           <VideoCard
             :bvid="video.bvid"
             :cover="video.cover"
@@ -72,7 +68,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { onMounted, reactive, ref, toRaw } from 'vue'
 import { getVideoList, getVideoListSeason } from '@/api/collection'
 import { Icon } from '@iconify/vue'
-import { useBaseStore, useTaskStore } from '@/store/index'
+import { useBaseStore } from '@/store/index'
 import VideoCard from '@/components/VideoCard.vue'
 
 interface Video {
@@ -117,7 +113,6 @@ const vList = ref<Video[]>([])
 const total = ref<number>(0)
 const userVideo = ref<HTMLElement>()
 const baseStore = useBaseStore()
-const taskStore = useTaskStore()
 const type = ref<string>('11')
 
 onMounted(async () => {
@@ -171,17 +166,6 @@ const handleOrder = (key: string) => {
   .el-pagination {
     --el-pagination-bg-color: rgba(0, 0, 0, 0);
     --el-pagination-button-disabled-bg-color: rgba(0, 0, 0, 0);
-  }
-
-  .video-card {
-    .video-download {
-      display: none;
-    }
-    &:hover {
-      .video-download {
-        display: flex;
-      }
-    }
   }
 }
 </style>

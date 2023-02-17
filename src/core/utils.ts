@@ -7,6 +7,18 @@ export const formatSecond = (duration: number) => {
   }`
 }
 
+export const formatTime = (time: number) => {
+  const date = new Date(time * 1000) //获取一个时间对象
+  // date.getFullYear() // 获取完整的年份(4位,1970)
+  // date.getMonth() // 获取月份(0-11,0代表1月,用的时候记得加上1)
+  // date.getDate() // 获取日(1-31)
+  // date.getTime() // 获取时间(从1970.1.1开始的毫秒数)
+  // date.getHours() // 获取小时数(0-23)
+  // date.getMinutes() // 获取分钟数(0-59)
+  // date.getSeconds() // 获取秒数(0-59)
+  return date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate()
+}
+
 export const urlConversion = (path: string) => {
   if (!path) {
     return path
@@ -19,7 +31,8 @@ export const urlConversion = (path: string) => {
 
 // 替换不合法的文件名字符
 export const filterTitle = (title: string) => {
-  const pattern = /[「」`~!@#$^&*()=|{}':;',[\]<>/?~！@#￥……&*（）——|{}【】'；：""'。，、？\s]/g
+  // const pattern = /[「」`~!@#$^&*()=|{}':;',[\]<>/?~！@#￥……&*（）——|{}【】'；：""'。，、？\s]/g
+  const pattern = /[*|:[\]<>/?*""]/g
   return title.replace(pattern, '')
 }
 

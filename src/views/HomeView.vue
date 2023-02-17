@@ -3,11 +3,7 @@
     <el-scrollbar class="px-9">
       <!-- 输入框 -->
       <div class="mt-4">
-        <el-input
-          v-model="inputData"
-          placeholder="输入UID搜索用户投稿视频"
-          @keydown.enter="toUserPage"
-        >
+        <el-input v-model="inputData" placeholder="输入关键词搜索" @keydown.enter="toUserPage">
           <template #append>
             <el-button :icon="Search" @click="toUserPage" />
           </template>
@@ -82,16 +78,16 @@ const toUserPage = () => {
     })
     return
   }
-  const reg = /^\d+$/
-  if (!reg.test(inputData.value)) {
-    ElMessage({
-      message: 'UID只能为数字',
-      type: 'info',
-    })
-    return
-  }
+  // const reg = /^\d+$/
+  // if (!reg.test(inputData.value)) {
+  //   ElMessage({
+  //     message: 'UID只能为数字',
+  //     type: 'info',
+  //   })
+  //   return
+  // }
   $router.push({
-    path: '/userVideo/index',
+    path: '/searchResult/index',
     query: { search: inputData.value, t: Date.now() },
   })
 }

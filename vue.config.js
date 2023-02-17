@@ -9,6 +9,19 @@ module.exports = defineConfig({
       externals: ['ffmpeg-static', 'fluent-ffmpeg'],
       nodeModulesPath: ['../../node_modules', './node_modules'],
       preload: 'src/preload.js',
+      builderOptions: {
+        productName: 'BilibiliVideoBox',
+        appId: 'com.w.BilibiliVideoBox',
+        nsis: {
+          oneClick: false,
+          perMachine: false,
+          allowToChangeInstallationDirectory: true,
+          createDesktopShortcut: true,
+        },
+        win: {
+          target: 'nsis',
+        },
+      },
     },
   },
   configureWebpack: {

@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import { useRouteHistoryStore } from '@/store/index'
 import { useBaseStore } from '@/store/index'
@@ -17,7 +17,7 @@ export const routes: Array<RouteRecordRaw> = [
         path: 'search',
         component: HomeView,
         meta: {
-          title: '搜索用户',
+          title: '搜索',
           icon: 'mdi:magnify-expand',
           keepAlive: true,
         },
@@ -152,10 +152,29 @@ export const routes: Array<RouteRecordRaw> = [
       },
     ],
   },
+  {
+    path: '/searchResult',
+    name: 'searchPage',
+    component: Layout,
+    meta: {
+      isHidden: true,
+    },
+    children: [
+      {
+        path: 'index',
+        name: 'searchResult',
+        component: () => import('@/views/SearchResult.vue'),
+        meta: {
+          title: '收藏夹内容',
+          keepAlive: true,
+        },
+      },
+    ],
+  },
 ]
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHashHistory(process.env.BASE_URL),
   routes,
 })
 

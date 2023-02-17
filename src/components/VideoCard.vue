@@ -21,17 +21,17 @@
     <div
       class="text-xs overflow-hidden cursor-pointer hover:text-primary"
       style="line-height: 20px; height: 38px; margin-top: 6px"
+      :title="title"
       @click="toVideoDetail(bvid)"
-    >
-      {{ title }}
-    </div>
+      v-html="title"
+    ></div>
     <div
       v-if="up !== ''"
       style="font-size: 12px; line-height: 14px; height: 14px; color: #999"
       class="flex items-center mt-1"
     >
       <img src="@/assets/up.png" alt="" width="17" height="17" class="w-[17px] h-[17px] mr-1" />{{
-        up
+        up + '' + upTime
       }}
     </div>
     <!-- 下载按钮 -->
@@ -91,6 +91,10 @@ const props = defineProps({
   loading: {
     type: HTMLElement,
     default: undefined,
+  },
+  upTime: {
+    type: String,
+    default: '',
   },
 })
 const $router = useRouter()

@@ -1,5 +1,6 @@
 <div align="center">
   <h1>BilibiliVideoBox</h1>
+  <blockquote>bilibili视频桌面端软件，UI仿照了QQ音乐桌面版</blockquote>
 </div>
 
 ## 安装

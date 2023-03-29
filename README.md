@@ -7,7 +7,7 @@
 
 克隆到本地
 
-```js
+```
 pnpm install
 pnpm run electron:build
 ```

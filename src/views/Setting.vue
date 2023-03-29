@@ -38,7 +38,7 @@
       <div class="flex">
         <el-radio-group v-model="setting.isFolder">
           <el-radio :label="false">不分文件夹</el-radio>
-          <el-radio :label="true">按视频分文件夹</el-radio>
+          <el-radio :label="true">按视频分文件夹（仅有多个分P）</el-radio>
         </el-radio-group>
       </div>
     </div>

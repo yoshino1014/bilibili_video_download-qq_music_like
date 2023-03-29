@@ -1,7 +1,7 @@
 import { getLoginInfo } from '@/api/login'
 import UA from '@/assets/data/userAgent'
 import type { PlayeurlParam, VideoData, Page, DownloadUrl, Subtitle, TaskData } from '@/types/index'
-import { getPalyUrl, getEpInfo, getMoreVideoInfo } from '@/api/video'
+import { getPalyUrl, getEpInfo, getMoreVideoInfo, getMediaUrl } from '@/api/video'
 import { formatSecond, filterTitle } from './utils'
 import { useBaseStore, useSettingStore, useTaskStore } from '@/store'
 import { v4 as uuidv4 } from 'uuid'
@@ -38,7 +38,7 @@ export const checkLogin = async (SESSDATA: string) => {
   if (!body.data.isLogin) {
     return userData
   }
-  if (body.data.vipType === 0) {
+  if (body.data.vipStatus === 0) {
     userData.loginStatus = 1
     return userData
   }
@@ -143,6 +143,7 @@ const parseBV = async (html: string, url: string) => {
       url,
       bvid: videoData.bvid,
       cid: videoData.cid,
+      aid: videoData.aid,
       cover: videoData.pic,
       createdTime: -1,
       quality: -1,
@@ -235,37 +236,26 @@ const parseEPPageData = (epList: any[]): Page[] => {
 const parseEP = async (html: string, url: string) => {
   try {
     const videoInfo = html.match(
-      /<script>window\.__INITIAL_STATE__=([\s\S]*?);\(function\(\)\{var s;/
+      /<script id="__NEXT_DATA__" type="application\/json">([\s\S]*?)<\/script>/
     )
     if (!videoInfo) {
       throw new Error('parse ep error')
     }
-    const { h1Title, mediaInfo, epInfo, epList } = JSON.parse(videoInfo[1])
+    const htmlFormateJson = JSON.parse(videoInfo[1])
+    const epMap = htmlFormateJson.props.pageProps.dehydratedState.queries[0].state.data.epMap
+    const mediaInfo =
+      htmlFormateJson.props.pageProps.dehydratedState.queries[0].state.data.mediaInfo
+    const epId = htmlFormateJson.props.pageProps.dehydratedState.queries[1].queryKey[1]
+    const epInfo = epMap[epId.slice(2)]
     // 获取视频下载地址
-    let acceptQuality = null
-    try {
-      let downLoadData: any = html.match(
-        /<script>window\.__playinfo__=([\s\S]*?)<\/script><script>window\.__INITIAL_STATE__=/
-      )
-      if (!downLoadData) {
-        throw new Error('parse ep error')
-      }
-      downLoadData = JSON.parse(downLoadData[1])
-      acceptQuality = {
-        accept_quality: downLoadData.data.accept_quality,
-        video: downLoadData.data.dash.video,
-        audio: downLoadData.data.dash.audio,
-      }
-    } catch (error) {
-      acceptQuality = await getAcceptQuality(epInfo.cid, epInfo.bvid)
-    }
+    const acceptQuality = await getMediaAcceptQuality(epInfo.cid)
     const obj: VideoData = {
       id: '',
       title: mediaInfo.season_title,
       url,
       bvid: epInfo.bvid,
       cid: epInfo.cid,
-      cover: `http:${mediaInfo.cover}`,
+      cover: `https:${mediaInfo.cover}`,
       createdTime: -1,
       quality: -1,
       view: mediaInfo.stat.views,
@@ -273,14 +263,20 @@ const parseEP = async (html: string, url: string) => {
       reply: mediaInfo.stat.reply,
       duration: formatSecond(epInfo.duration / 1000),
       up: [
-        { name: mediaInfo.upInfo.name, mid: mediaInfo.upInfo.mid, face: mediaInfo.upInfo.avatar },
+        {
+          name: mediaInfo.up_info.uname,
+          mid: mediaInfo.up_info.mid,
+          face: 'https:' + mediaInfo.up_info.avatar,
+        },
       ],
       desc: mediaInfo.evaluate,
       qualityOptions: acceptQuality.accept_quality.map((item: any) => ({
         label: qualityMap[item],
         value: item,
       })),
-      page: parseEPPageData(epList),
+      page: parseEPPageData(
+        htmlFormateJson.props.pageProps.dehydratedState.queries[0].state.data.initEpList
+      ),
       subtitle: [],
       video: acceptQuality.video
         ? acceptQuality.video.map((item: any) => ({
@@ -311,14 +307,21 @@ const parseSS = async (html: string) => {
   const baseStore = useBaseStore()
   try {
     const videoInfo = html.match(
-      /<script>window\.__INITIAL_STATE__=([\s\S]*?);\(function\(\)\{var s;/
+      /<script id="__NEXT_DATA__" type="application\/json">([\s\S]*?)<\/script>/
     )
+    // console.log(videoInfo)
     if (!videoInfo) {
-      throw new Error('parse ss error')
+      throw new Error('解析页面出错,位置parseSS')
     }
-    const { mediaInfo } = JSON.parse(videoInfo[1])
-    const { body } = await getEpInfo(mediaInfo.newestEp.id, baseStore.token.SESSDATA)
-    return parseEP(body, `https://www.bilibili.com/bangumi/play/ep${mediaInfo.newestEp.id}`)
+    const mediaInfo = JSON.parse(videoInfo[1])
+    const { body } = await getEpInfo(
+      mediaInfo.props.pageProps.dehydratedState.queries[0].state.data.mediaInfo.episodes[0].ep_id,
+      baseStore.token.SESSDATA
+    )
+    return parseEP(
+      body,
+      `https://www.bilibili.com/bangumi/play/ep${mediaInfo.props.pageProps.dehydratedState.queries[0].state.data.mediaInfo.episodes[0].ep_id}`
+    )
   } catch (error: any) {
     throw new Error(error)
   }
@@ -343,14 +346,41 @@ const getAcceptQuality = async (cid: number, bvid: string) => {
         dash: { video, audio },
       },
     },
-    // headers: { 'set-cookie': responseCookies },
   } = await getPalyUrl(params, baseStore.token.SESSDATA)
-  // 保存返回的cookies
-  // saveResponseCookies(responseCookies)
   return {
     accept_quality,
     video,
     audio,
+  }
+}
+
+const getMediaAcceptQuality = async (cid: number) => {
+  const baseStore = useBaseStore()
+  const params: PlayeurlParam = {
+    cid,
+    qn: 127,
+    fourk: 1,
+    fnver: 0,
+    fnval: 80,
+    session: '68191c1dc3c75042c6f35fba895d65b0',
+  }
+  const {
+    body: {
+      result: { accept_quality, dash, durl, type },
+    },
+  } = await getMediaUrl(params, baseStore.token.SESSDATA)
+  if (dash === undefined) {
+    return {
+      type,
+      accept_quality,
+      durl,
+    }
+  }
+  return {
+    accept_quality,
+    video: dash.video,
+    audio: dash.audio,
+    type,
   }
 }
 
@@ -378,13 +408,13 @@ const handleFilePathList = (
   name: string,
   title: string,
   up: string,
-  bvid: string
+  pages: boolean
 ): string[] => {
   const settingStore = useSettingStore()
   const downloadPath = settingStore.downloadPath
-  const pageName = `${!page ? '' : `${filterTitle(name)}[P${page}]`}${filterTitle(`${title}`)}`
+  const pageName = `${!page ? '' : `[P${page}]`}${filterTitle(`${title}`)}`
   const dirName = `${filterTitle(`${name}-${up}`)}`
-  const isFolder = settingStore.isFolder
+  const isFolder = settingStore.isFolder && pages
   return [
     `${downloadPath}\\${isFolder ? `${dirName}\\` : ''}${pageName}.mp4`,
     `${downloadPath}\\${isFolder ? `${dirName}\\` : ''}${pageName}.png`,
@@ -395,18 +425,19 @@ const handleFilePathList = (
 }
 
 // 处理fileDir
-const handleFileDir = (page: number, title: string, up: string, bvid: string): string => {
+const handleFileDir = (title: string, up: string, pages: boolean): string => {
   const settingStore = useSettingStore()
   const downloadPath = settingStore.downloadPath
   const name = `${filterTitle(`${title}-${up}`)}`
-  const isFolder = settingStore.isFolder
+  const isFolder = settingStore.isFolder && pages
   return `${downloadPath}${isFolder ? `\\${name}\\` : ''}`
 }
 
 export const getDownloadList = async (
   videoInfo: VideoData,
   selected: number[],
-  quality: number
+  quality: number,
+  type = 'video'
 ) => {
   const baseStore = useBaseStore()
   const downLoadList: VideoData[] = []
@@ -443,31 +474,50 @@ export const getDownloadList = async (
       downloadUrl.audio = audio.url
     } else {
       // 当多p的时候，除了第一p其他p都无法通过上述方式获取URL
-      // 通过访问获取
-      const {
-        body: {
-          data: { dash },
-        },
-      } = await getPalyUrl(
-        {
+      // 区分番剧和普通视频
+      let dashList: any
+      if (type === 'video') {
+        const {
+          body: {
+            data: { dash },
+          },
+        } = await getPalyUrl(
+          {
+            cid: currentCid,
+            bvid: currentBvid,
+            qn: quality,
+            otype: 'json',
+            fourk: 1,
+            fnver: 0,
+            fnval: 80,
+          },
+          baseStore.token.SESSDATA
+        )
+        dashList = dash
+      } else {
+        const params: PlayeurlParam = {
           cid: currentCid,
-          bvid: currentBvid,
-          qn: quality,
-          otype: 'json',
+          qn: 127,
           fourk: 1,
           fnver: 0,
           fnval: 80,
-        },
-        baseStore.token.SESSDATA
-      )
-      downloadUrl.video = dash.video.find((e: any) => {
+          session: '68191c1dc3c75042c6f35fba895d65b0',
+        }
+        const {
+          body: {
+            result: { dash },
+          },
+        } = await getMediaUrl(params, baseStore.token.SESSDATA)
+        dashList = dash
+      }
+      downloadUrl.video = dashList.video.find((e: any) => {
         return e.id === quality
       })
-        ? dash.video.find((e: any) => {
+        ? dashList.video.find((e: any) => {
             return e.id === quality
           }).baseUrl
-        : dash.video[0].baseUrl
-      downloadUrl.audio = dash.audio.reduce(
+        : dashList.video[0].baseUrl
+      downloadUrl.audio = dashList.audio.reduce(
         (x: any, y: any) => {
           return x.id > y.id ? x : y
         },
@@ -488,18 +538,13 @@ export const getDownloadList = async (
       bvid: currentBvid,
       downloadUrl,
       filePathList: handleFilePathList(
-        selected.length === 1 ? 0 : current,
+        videoInfo.page.length === 1 ? 0 : current,
         videoInfo.title,
         currentPage.title,
         videoInfo.up[0].name,
-        currentBvid
+        videoInfo.page.length > 1
       ),
-      fileDir: handleFileDir(
-        selected.length === 1 ? 0 : current,
-        videoInfo.title,
-        videoInfo.up[0].name,
-        currentBvid
-      ),
+      fileDir: handleFileDir(videoInfo.title, videoInfo.up[0].name, videoInfo.page.length > 1),
       subtitle,
     }
     downLoadList.push(videoData)

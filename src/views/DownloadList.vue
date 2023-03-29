@@ -87,9 +87,6 @@
                 @click.right="showContextmenu(task)"
               >
                 <div class="flex-1 ellipsis-1 px-3">
-                  <span class="text-red-500 font-bold">
-                    {{ task.status === 5 ? '下载失败' : '' }}
-                  </span>
                   {{ task.title }}
                 </div>
                 <div class="w-44 ellipsis-1 px-3">{{ task.up[0].name }}</div>
@@ -99,6 +96,45 @@
             </el-scrollbar>
             <div v-else>
               <el-empty description="没有下载完成的视频" />
+            </div>
+          </div>
+        </div>
+      </el-tab-pane>
+      <el-tab-pane :label="'下载失败' + failureArray.length" name="failure">
+        <div class="pt-2">
+          <!-- <el-button class="el-button-custom">
+            <Icon icon="mdi:reload" class="mr-1 text-lg"></Icon>
+            <span>重新下载</span>
+          </el-button> -->
+          <el-button class="el-button-custom-primary" @click="deleteFailure">
+            <Icon icon="mdi:delete-empty-outline" class="mr-1 text-lg"> </Icon>
+            <span>清空</span>
+          </el-button>
+          <div :style="{ height: tableHeight + 'px' }" class="mt-7">
+            <ul class="flex text-xs text-[#666] h-6 leading-6">
+              <li class="flex-1 px-3">标题</li>
+              <li class="w-44 px-3">UP</li>
+              <li class="w-28 px-3">大小</li>
+              <li class="w-28 px-3">时长</li>
+            </ul>
+            <el-scrollbar v-if="failureArray.length > 0" :height="350">
+              <div
+                v-for="(task, index) in failureArray"
+                :key="index"
+                class="flex hover:bg-[#efefef] h-[50px] leading-[50px]"
+                @click.right="showContextmenu(task)"
+              >
+                <div class="flex-1 ellipsis-1 px-3">
+                  <span class="text-red-500 font-bold"> 下载失败 </span>
+                  {{ task.title }}
+                </div>
+                <div class="w-44 ellipsis-1 px-3">{{ task.up[0].name }}</div>
+                <div class="w-28 ellipsis-1 px-3">{{ formatVideoSize(task.size) }}</div>
+                <div class="w-28 ellipsis-1 px-3">{{ task.duration }}</div>
+              </div>
+            </el-scrollbar>
+            <div v-else>
+              <el-empty description="没有下载失败的视频" />
             </div>
           </div>
         </div>
@@ -185,7 +221,17 @@ const downloadingArray = computed(() => {
 const completedArray = computed(() => {
   return taskArray.value
     .filter((item) => {
-      return item.status === 0 || item.status === 5
+      return item.status === 0
+    })
+    .sort((a, b) => {
+      return b.completeTime - a.completeTime
+    })
+})
+
+const failureArray = computed(() => {
+  return taskArray.value
+    .filter((item) => {
+      return item.status === 5
     })
     .sort((a, b) => {
       return b.completeTime - a.completeTime
@@ -285,6 +331,24 @@ const deleteDownloading = async () => {
     const arr: string[] = []
     for (let i = 0; i < downloadingArray.value.length; i++) {
       arr.push(downloadingArray.value[i].id)
+    }
+    taskStore.deleteTask(arr)
+  })
+}
+
+// 删除下载失败的任务
+const deleteFailure = async () => {
+  ElMessageBox.confirm('确认删除全部任务？', '警告', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+    draggable: true,
+    customClass: 'custom-confirm',
+    closeOnClickModal: false,
+  }).then(async () => {
+    const arr: string[] = []
+    for (let i = 0; i < failureArray.value.length; i++) {
+      arr.push(failureArray.value[i].id)
     }
     taskStore.deleteTask(arr)
   })

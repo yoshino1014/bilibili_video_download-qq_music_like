@@ -77,6 +77,7 @@ export interface VideoData {
   title: string
   url: string
   bvid: string
+  aid?: number
   cid: number
   cover: string
   createdTime: number

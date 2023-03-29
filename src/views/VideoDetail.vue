@@ -68,7 +68,7 @@
         <!-- 下载按钮 -->
         <el-button
           class="absolute bottom-0 z-0 el-button-custom"
-          :disabled="selected.length === 0"
+          :disabled="selected.length === 0 || videoInfo.video.length === 0"
           :loading="downloading"
           @click="handleDownload"
         >
@@ -82,6 +82,16 @@
           <Icon icon="mdi:open-in-app" class="mr-1 text-lg"></Icon>
           <span>打开B站</span>
         </el-button>
+        <div
+          v-if="baseStore.loginStatus !== 0"
+          :class="[
+            followStatus ? 'text-yellow-400' : ' text-slate-400',
+            'absolute bottom-0 left-64 z-0 rounded-full h-[33px] w-[33px] flex items-center justify-center border ml-3 cursor-pointer',
+          ]"
+          @click="changeFollow"
+        >
+          <Icon icon="mdi:star" class="text-lg"></Icon>
+        </div>
       </div>
     </div>
     <!-- 获取长度用，无显示意义 -->
@@ -138,6 +148,8 @@ import { useBaseStore, useTaskStore } from '@/store/index'
 import type { VideoData, Page } from '@/types/index'
 import { Icon } from '@iconify/vue'
 import { userQuality } from '@/assets/data/setting'
+import { ifFollow, addIn } from '@/api/video'
+import { getCollection } from '@/api/collection'
 
 const MAX_WIDTH = 380
 const LEFTFORTABLE = 364
@@ -151,6 +163,7 @@ const videoInfo = ref<VideoData>({
   url: '',
   bvid: '',
   cid: -1,
+  aid: -1,
   cover: '',
   createdTime: -1,
   quality: -1,
@@ -183,6 +196,7 @@ const content = ref<HTMLElement>()
 const tableHeight = ref<number>(window.innerHeight - LEFTFORTABLE)
 const downloadTable = ref<InstanceType<typeof ElTable>>()
 const downloading = ref<boolean>(false)
+const followStatus = ref<boolean>(false)
 
 onMounted(async () => {
   const search = $route.query.search
@@ -221,17 +235,46 @@ onMounted(async () => {
     console.error(error)
     ElMessage.error(`解析错误：${error}`)
   }
+  // 自适应
   descInner.value = videoInfo.value.desc
   await nextTick()
   if (desc.value?.clientWidth && descWidth.value < desc.value?.clientWidth) {
     showDetail.value = true
   }
   window.addEventListener('resize', pageResize)
+  // 收藏状态
+  if (baseStore.loginStatus !== 0 && type === 'BV') {
+    ifFollow(videoInfo.value.bvid, baseStore.token.SESSDATA).then((res) => {
+      followStatus.value = res.body.data.favoured
+    })
+  }
 })
 
 onDeactivated(() => {
   window.removeEventListener('resize', pageResize, true)
 })
+
+const changeFollow = async () => {
+  if (!followStatus.value) {
+    const {
+      body: {
+        data: { list },
+      },
+    } = await getCollection(baseStore.token.DedeUserID, baseStore.token.SESSDATA)
+    addIn(baseStore.token.SESSDATA, videoInfo.value.aid, baseStore.token.biliJct, list[0].id).then(
+      (res) => {
+        ifFollow(videoInfo.value.bvid, baseStore.token.SESSDATA).then((res) => {
+          followStatus.value = res.body.data.favoured
+          if (followStatus.value) {
+            ElMessage.success(`加入默认收藏夹`)
+          }
+        })
+      }
+    )
+  } else {
+    ElMessage.info(`已收藏`)
+  }
+}
 
 const pageResize = () => {
   const v = window.innerWidth - 1020
@@ -258,21 +301,27 @@ const handleRowClick = (row: any) => {
 
 const handleDownload = async () => {
   downloading.value = true
-  const downloadList = await getDownloadList(
-    toRaw(videoInfo.value),
-    toRaw(selected.value),
-    qualitySelect.value
-  )
-  const taskList = addDownloadList(downloadList)
-  taskStore.updateTaskMap(taskList)
-  taskList.forEach((task) => {
-    if (task.status === 1) {
-      // 下载
-      window.electronApi.downloadVideo({ task, SESSDATA: baseStore.token.SESSDATA })
-      // 计数+1
-      taskStore.downloadingTaskCount++
-    }
-  })
+  try {
+    const downloadList = await getDownloadList(
+      toRaw(videoInfo.value),
+      toRaw(selected.value),
+      qualitySelect.value,
+      videoInfo.value.url.includes('https://www.bilibili.com/bangumi/play/ep') ? 'media' : 'video'
+    )
+    const taskList = addDownloadList(downloadList)
+    taskStore.updateTaskMap(taskList)
+    taskList.forEach((task) => {
+      if (task.status === 1) {
+        // 下载
+        window.electronApi.downloadVideo({ task, SESSDATA: baseStore.token.SESSDATA })
+        // 计数+1
+        taskStore.downloadingTaskCount++
+      }
+    })
+  } catch (error) {
+    ElMessage.error('大会员专属，无法下载')
+    console.error(error)
+  }
   downloading.value = false
 }
 const toUserPage = (mid: string) => {

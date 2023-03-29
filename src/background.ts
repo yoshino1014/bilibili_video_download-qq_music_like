@@ -38,6 +38,7 @@ async function createWindow() {
     minHeight: 690,
     backgroundColor: '#f6f6f6',
     titleBarStyle: 'hidden',
+    frame: false,
     webPreferences: {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
@@ -238,9 +239,9 @@ app.on('ready', async () => {
     // } catch (e) {
     //   console.error('Vue Devtools failed to install:', (e as Error).toString())
     // }
-    // await session.defaultSession.loadExtension(
-    //   'C:\\Users\\11720\\AppData\\Local\\Microsoft\\Edge\\User Data\\Profile 1\\Extensions\\olofadcdnkkjdfgjcmjaadnlehnnihnl\\6.5.0_0'
-    // )
+    await session.defaultSession.loadExtension(
+      'C:\\Users\\11720\\AppData\\Local\\Microsoft\\Edge\\User Data\\Profile 1\\Extensions\\olofadcdnkkjdfgjcmjaadnlehnnihnl\\6.5.0_0'
+    )
   }
   createWindow()
   init()

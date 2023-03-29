@@ -9,7 +9,6 @@ import { onMounted } from 'vue'
 import { checkLogin, addDownloadList } from '@/core/bilibili'
 import { useBaseStore, useSettingStore, useTaskStore } from '@/store/index'
 import type { TokenData, SettingData, TaskData } from '@/types/index'
-
 const baseStore = useBaseStore()
 const settingStore = useSettingStore()
 const taskStore = useTaskStore()

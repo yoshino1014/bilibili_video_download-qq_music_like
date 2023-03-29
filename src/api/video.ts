@@ -13,6 +13,19 @@ export function getPalyUrl(params: PlayeurlParam, SESSDATA: string): Promise<any
   })
 }
 
+//视频流URL(番剧)
+export function getMediaUrl(params: PlayeurlParam, SESSDATA: string): Promise<any> {
+  return window.electronApi.got(`https://api.bilibili.com/pgc/player/web/playurl`, {
+    headers: {
+      'User-Agent': `${UA}`,
+      cookie: `SESSDATA=${SESSDATA}`,
+      Referer: 'https://www.bilibili.com',
+    },
+    responseType: 'json',
+    searchParams: params,
+  })
+}
+
 // 获得番剧信息
 export function getEpInfo(id: string, SESSDATA: string): Promise<any> {
   return window.electronApi.got(`https://www.bilibili.com/bangumi/play/ep${id}`, {
@@ -73,10 +86,53 @@ export function search(
   })
 }
 
+// 获得完整的cookie
 export function getCookies(): Promise<any> {
   return window.electronApi.got(`https://www.bilibili.com`, {
     headers: {
       'User-Agent': `${UA}`,
+    },
+  })
+}
+
+// 判断是否收藏
+export function ifFollow(aid: string, SESSDATA: string): Promise<any> {
+  return window.electronApi.got(`https://api.bilibili.com/x/v2/fav/video/favoured`, {
+    headers: {
+      'User-Agent': `${UA}`,
+      cookie: `SESSDATA=${SESSDATA}`,
+    },
+    responseType: 'json',
+    searchParams: { aid },
+  })
+}
+
+// 加入收藏
+export function addIn(
+  access_key: string,
+  rid: number | undefined,
+  csrf: string,
+  add_media_ids: number
+): Promise<any> {
+  return window.electronApi.got('https://api.bilibili.com/x/v3/fav/resource/deal', {
+    method: 'POST',
+    headers: {
+      'User-Agent': `${UA}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+      Referer: 'https://www.bilibili.com',
+      cookie: `SESSDATA=${access_key}`,
+    },
+    form: {
+      add_media_ids,
+      rid,
+      type: 2,
+      csrf,
+      jsonp: 'jsonp',
+      platform: 'web',
+      eab_x: 2,
+      ramval: 1,
+      gaia_source: 'web_normal',
+      ga: 1,
     },
   })
 }

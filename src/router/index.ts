@@ -17,7 +17,7 @@ export const routes: Array<RouteRecordRaw> = [
         path: 'search',
         component: HomeView,
         meta: {
-          title: '搜索',
+          title: '热门视频',
           icon: 'mdi:magnify-expand',
           keepAlive: true,
         },

@@ -24,6 +24,7 @@ declare module '@vue/runtime-core' {
     ElTabs: typeof import('element-plus/es')['ElTabs']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
     LoginDialog: typeof import('./src/components/LoginDialog.vue')['default']
+    MediaCard: typeof import('./src/components/MediaCard.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     VideoCard: typeof import('./src/components/VideoCard.vue')['default']

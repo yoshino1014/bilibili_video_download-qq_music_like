@@ -3,15 +3,15 @@
     <el-input
       v-model="searchValue"
       :spellcheck="false"
-      placeholder="视频网址"
+      placeholder="搜索"
       clearable
-      @keydown.enter="toDetailPage"
+      @keydown.enter="toSearchPage"
     >
       <template #suffix>
         <Icon
           icon="ant-design:search-outlined"
           class="cursor-pointer hover:text-primary"
-          @click="toDetailPage"
+          @click="toSearchPage"
         />
       </template>
     </el-input>
@@ -22,30 +22,16 @@
 import { ref } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import { checkUrl } from '@/core/bilibili'
 
 const searchValue = ref<string>('')
 const $router = useRouter()
 
-const toDetailPage = () => {
+const toSearchPage = () => {
   if (searchValue.value === '') {
-    ElMessage({
-      message: '请输入视频地址',
-      type: 'info',
-    })
-    return
-  }
-  const type = checkUrl(searchValue.value)
-  if (!type) {
-    ElMessage({
-      message: '请输入正确的视频地址',
-      type: 'warning',
-    })
     return
   }
   $router.push({
-    path: '/videoDetail/index',
+    path: '/searchResult/index',
     query: { search: searchValue.value, t: Date.now() },
   })
 }
